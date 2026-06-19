@@ -1,51 +1,56 @@
-import { useState } from "react";
-import reactLogo from "./assets/react.svg";
-import { invoke } from "@tauri-apps/api/core";
-import "./App.css";
+import { useState, useEffect } from "react"
+import "./App.css"
 
 function App() {
-  const [greetMsg, setGreetMsg] = useState("");
-  const [name, setName] = useState("");
 
-  async function greet() {
-    // Learn more about Tauri commands at https://tauri.app/develop/calling-rust/
-    setGreetMsg(await invoke("greet", { name }));
+  const [running, setRunning] = useState(false)
+  const [minutes, setMinutes] = useState(0)
+  const [seconds, setSeconds] = useState(0)
+
+  function startTimer() {
+    setRunning(true)
   }
+
+  function stopTimer() {
+    setRunning(false)
+  }
+
+  useEffect(() => {
+    if (!running) return
+
+    if (minutes <= 0 && seconds <= 0) {
+      stopTimer()
+      return
+    }
+
+    const timerId = setTimeout(() => {
+      if (seconds === 0) {
+        setMinutes((prev) => prev - 1)
+        setSeconds(59)
+      } else {
+        setSeconds((prev) => prev - 1)
+      }
+    }, 1000)
+
+    return () => clearTimeout(timerId)
+  }, [running, minutes, seconds])
 
   return (
     <main className="container">
-      <h1>Welcome to Tauri + React</h1>
+      <h1>Time</h1>
 
       <div className="row">
-        <a href="https://vite.dev" target="_blank">
-          <img src="/vite.svg" className="logo vite" alt="Vite logo" />
-        </a>
-        <a href="https://tauri.app" target="_blank">
-          <img src="/tauri.svg" className="logo tauri" alt="Tauri logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
+        <input className="timeInput" type="number" name="" id="" min={0} max={480} step={1} placeholder="00" value={minutes} onChange={(e) => setMinutes(e.target.value)} disabled={running} />
+        <span>:</span>
+        <input className="timeInput" type="number" name="" id="" min={0} max={59} step={1} placeholder="00" value={seconds} onChange={(e) => setSeconds(e.target.value)} disabled={running} />
       </div>
-      <p>Click on the Tauri, Vite, and React logos to learn more.</p>
 
-      <form
-        className="row"
-        onSubmit={(e) => {
-          e.preventDefault();
-          greet();
-        }}
-      >
-        <input
-          id="greet-input"
-          onChange={(e) => setName(e.currentTarget.value)}
-          placeholder="Enter a name..."
-        />
-        <button type="submit">Greet</button>
-      </form>
-      <p>{greetMsg}</p>
+      <div className="row">
+        <button className="startBtn" onClick={startTimer}>Start</button>
+        <button className="stopBtn" onClick={stopTimer}>Stop</button>
+      </div>
     </main>
-  );
+  )
 }
 
-export default App;
+export default App
