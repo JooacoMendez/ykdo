@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react"
+import validator from 'validator'
 import "./App.css"
 
 function App() {
@@ -13,6 +14,16 @@ function App() {
 
   function stopTimer() {
     setRunning(false)
+  }
+
+  function handleKeyDown(e, setValue, maxLimit) {
+    if (e.key === "ArrowUp") {
+      e.preventDefault();
+      setValue((prev) => Math.min(prev + 1, maxLimit));
+    } else if (e.key === "ArrowDown") {
+      e.preventDefault();
+      setValue((prev) => Math.max(prev - 1, 0));
+    }
   }
 
   useEffect(() => {
@@ -40,12 +51,12 @@ function App() {
       <h1>Time</h1>
 
       <div className="row">
-        <input className="timeInput" type="number" name="" id="" min={0} max={480} step={1} placeholder="00" value={minutes} onChange={(e) => setMinutes(e.target.value)} disabled={running} />
+        <input className="timeInput" type="text" value={String(minutes).padStart(2, '0')} onChange={(e) => setMinutes(validator.isInt(e.target.value, { min: 0, max: 480 }) ? parseInt(e.target.value) : Math.min(parseInt(e.target.value) || 0, 480))} onKeyDown={(e) => handleKeyDown(e, setMinutes, 480)} disabled={running} />
         <span>:</span>
-        <input className="timeInput" type="number" name="" id="" min={0} max={59} step={1} placeholder="00" value={seconds} onChange={(e) => setSeconds(e.target.value)} disabled={running} />
+        <input className="timeInput" type="text" value={String(seconds).padStart(2, '0')} onChange={(e) => setSeconds(validator.isInt(e.target.value, { min: 0, max: 59 }) ? parseInt(e.target.value) : Math.min(parseInt(e.target.value) || 0, 59))} onKeyDown={(e) => handleKeyDown(e, setSeconds, 59)} disabled={running} />
       </div>
 
-      <div className="row">
+      <div className="row-btn">
         <button className="startBtn" onClick={startTimer}>Start</button>
         <button className="stopBtn" onClick={stopTimer}>Stop</button>
       </div>
